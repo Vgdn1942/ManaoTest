@@ -1,6 +1,6 @@
 <?php
 class Head {
-    public static function setHead($title, $h2, $js) {
+    public static function setHead($title) {
         echo <<<EOF
         <!doctype html>
         <html lang="ru" theme="dark">
@@ -10,11 +10,10 @@ class Head {
                 <meta name="viewport" content="width=device-width, user-scalable=yes">
                 <title>$title</title>
                 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-                <script type="text/javascript" src="scripts/$js"></script>
                 <link rel="stylesheet" type="text/css" href="styles/style.css">
             </head>
             <body>
-                <h2>$h2</h2>
+                <h2>$title</h2>
         EOF;
     }
 
