@@ -82,6 +82,17 @@ form {
     display: inline;
 }
 
+form label {
+    position:relative;
+}
+
+.errorMsg {
+    position:absolute;
+    left:230px;
+    width:300px;
+    color:red;
+}
+
 td table {
     width: 100%;
     margin: 0;
