@@ -13,16 +13,16 @@ function sendForm (form, name) {
         'post.php', // адрес обработчика
         $(form).serialize() + '&form=' + name, // отправляемые данные
         function(msg) { // получен ответ сервера
-            let errorList = JSON.parse(msg);
-            for (let i = 0; i < errorList.length; i++) {
+            let errorList = JSON.parse(msg); // парсим ответ
+            for (let i = 0; i < errorList.length; i++) { // проходим в цикле по ошибкам
                 let id = name + errorList[i]['0']; // создаём уникальный id
                 if (document.getElementById(id)) { // удаляем элемент, если он уже был отображён
                     document.getElementById(id).remove();
                 }
                 if (errorList[i]['1'] !== 'ok') { // если есть ошибки выводим их напротив соответствующего поля
-                    if (!document.getElementById(id)) { // если ошибка уже отображена
+                    if (!document.getElementById(id)) { // если ошибка ещё не отображена
+                        //alert("1: " + errorList[i]['0'] + "; 2: " + errorList[i]['1'] + "; id: " + id);
                         showError(errorList[i]['0'], errorList[i]['1'], id);
-                        //alert("List: " + errorList[i]['0'] + "ID: " + id);
                     }
                 }
             }
