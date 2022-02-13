@@ -10,7 +10,8 @@ Head::setHead("Главная страница");
         </p>
         <p>
             <label for="password">Пароль:<br></label>
-            <input name="password" id="password" type="password" size="24" minlength="6" maxlength="24" required="required">
+            <input name="password" id="password" type="password" size="24" minlength="6" maxlength="24"
+                   required="required">
         </p>
         <p>
             <label for="confirm">Подверждение пароля:<br></label>
