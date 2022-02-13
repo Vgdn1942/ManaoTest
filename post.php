@@ -1,6 +1,12 @@
 <?php
-// проверяем, что что это ajax запрос
-if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+// обработка только ajax запросов (при других запросах завершаем выполнение скрипта)
+if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != 'XMLHttpRequest') {
+    exit();
+}
+// обработка данных, посланных только методом POST (при остальных методах завершаем выполнение скрипта)
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+    exit();
+}
     /*
     Поле login: (unique)    [валидация : минимум 6 символов ]
 +        1. Оставить поле незаполненным и попытаться отправить форму.
@@ -39,24 +45,24 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !empty($_SERVER['HTTP_X_REQUESTE
         Проверить ввод имени только из пробелов .
     */
 
-    $users = array(
-        'login' => "ok",
-        'password' => " <- Поле не может быть пустым!",
-        'email' => " <- Длина должна быть больше 6 символов!",
-        'name' => " <- Длина должна быть больше 2 символов!",
-    );
-    include_once 'include/JsonDb.php';
-    $users_db = new JsonDb();
-    $users_db->create($_POST['login'], $_POST['password'], $_POST['email'], $_POST['name']);
-    (new JsonDb)->create($_POST['login'], $_POST['password'], $_POST['email'], $_POST['name']);
-
-
-
+    //include_once 'include/JsonDb.php';
+    //include( 'include/JsonDb.php' );
+    require_once('include/JsonDb.php');
+    //$json_db = new JsonDb($_SERVER['DOCUMENT_ROOT'] . "/db/");
+    //$json_db = new JsonDb();
+    /*
+    try {
+        $json_db->insert('users.json',
+            [
+                'login' => $_POST['login'],
+                'password' => $_POST['password'],
+                'email' => $_POST['email'],
+                'name' => $_POST['name']
+            ]);
+    } catch (Exception $e) {
+    }
+*/
     checkForm();
-
-} else { // если это не ajax
-    exit;
-}
 
 function checkForm () {
     $errors = array(
@@ -73,6 +79,7 @@ function checkForm () {
         'confirm_pass' => " <- Пароли не совпадают!",
     );
 
+    $data['result'] = 'success';
     $result = array();
     $form = $_POST['form'];
 
@@ -157,6 +164,7 @@ function checkForm () {
         $result[] = $name;
     }
 
-    $answer = json_encode($result);
-    echo $answer; // json ответ
+    $data['result'] = 'error';
+    $result[] = $data;
+    echo json_encode($result);
 }
