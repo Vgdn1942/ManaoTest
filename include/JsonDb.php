@@ -27,28 +27,24 @@ class JsonDb {
          *
          * @return bool
          */
-
+        $val = true;
         // Checks if JSON file exists, if not create
         if (!file_exists($this->file)) {
             $this->commit();
         }
-
         // Read content of JSON file
         $content = file_get_contents($this->file);
         $content = json_decode($content);
-
         // Check if its arrays of jSON
         if (!is_array($content) && is_object($content)) {
+            $val = false;
             throw new Exception('An array of json is required: Json data enclosed with []');
-            return false;
-        }
-        // An invalid jSON file
-        elseif (!is_array($content) && !is_object($content)) {
+        } elseif (!is_array($content) && !is_object($content)) {
+            $val = false;
             throw new Exception('json is invalid');
-            return false;
+        } else {
+            return $val;
         }
-        else
-            return true;
     }
 
     public function select($args = '*'): JsonDb {
@@ -125,8 +121,7 @@ class JsonDb {
 
         if (!empty($this->content) && array_diff_key($values, (array )$this->content[0])) {
             throw new Exception('Columns must match as of the first row');
-        }
-        else {
+        } else {
             $this->content[] = ( object )$values;
             $this->last_indexes = [(count($this->content) - 1)];
             $this->commit();
@@ -150,72 +145,60 @@ class JsonDb {
                     $content = ( array )$this->content[$i];
                     if (!array_diff_key($this->update, $content)) {
                         $this->content[$i] = ( object )array_merge($content, $this->update);
-                    }
-                    else
+                    } else
                         throw new Exception('Update method has an off key');
-                }
-                else
+                } else {
                     continue;
+                }
             }
-        }
-        elseif (!empty($this->where) && empty($this->last_indexes)) {
-        }
-        else {
+        } elseif (!empty($this->where) && empty($this->last_indexes)) {
+            return;
+        } else {
             foreach ($this->content as $i => $v) {
-                $content = ( array )$this->content[$i];
-                if (!array_diff_key($this->update, $content)) $this->content[$i] = ( object )array_merge($content, $this->update);
-                else
+                $content = (array)$this->content[$i];
+                if (!array_diff_key($this->update, $content)) {
+                    $this->content[$i] = (object)array_merge($content, $this->update);
+                } else {
                     throw new Exception('Update method has an off key ');
+                }
             }
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function trigger(): JsonDb {
         $content = (!empty($this->where) ? $this->where_result() : $this->content);
-        $return = false;
         if ($this->delete) {
             if (!empty($this->last_indexes) && !empty($this->where)) {
                 $this->content = array_map(function($index, $value) {
-                    if (in_array($index, $this->last_indexes)) return false;
-                    else
+                    if (in_array($index, $this->last_indexes)) return false; else
                         return $value;
                 }, array_keys($this->content), $this->content);
                 $this->content = array_filter($this->content);
-            }
-            elseif (empty($this->where) && empty($this->last_indexes)) {
+            } elseif (empty($this->where) && empty($this->last_indexes)) {
                 $this->content = array();
             }
-
-            $return = true;
             $this->delete = false;
-        }
-        elseif (!empty($this->update)) {
+        } elseif (!empty($this->update)) {
             $this->_update();
             $this->update = [];
         }
-        else
-            $return = false;
         $this->commit();
         return $this;
     }
 
     private function where_result(): array {
-        /*
-            Validates the where statement values
-        */
-
+        // Validates the where statement values
         if ($this->merge == 'AND') {
             return $this->where_and_result();
-        }
-        else {
+        } else {
             $r = [];
-
             // Loop through the existing values. Ge the index and row
             foreach ($this->content as $index => $row) {
-
                 // Make sure its array data type
                 $row = ( array )$row;
-
                 // Loop again through each row,  get columns and values
                 foreach ($row as $column => $value) {
                     // If each of the column is provided in the where statement
@@ -224,12 +207,11 @@ class JsonDb {
                         if ($this->where[$column] == $value) {
                             // Append all to be modified row into a array variable
                             $r[] = $row;
-
                             // Append also each row array key
                             $this->last_indexes[] = $index;
-                        }
-                        else
+                        } else {
                             continue;
+                        }
                     }
                 }
             }
@@ -239,9 +221,7 @@ class JsonDb {
 
 
     private function where_and_result(): array {
-        /*
-            Validates the where statement values
-        */
+        // Validates the where statement values
         $r = [];
 
         // Loop through the db rows. Ge the index and row
@@ -250,17 +230,14 @@ class JsonDb {
             // Make sure its array data type
             $row = ( array )$row;
 
-
             //check if the row = where['col'=>'val', 'col2'=>'val2']
             if (!array_diff($this->where, $row)) {
                 $r[] = $row;
                 // Append also each row array key
                 $this->last_indexes[] = $index;
-
+            } else {
+                continue;
             }
-            else continue;
-
-
         }
         return $r;
     }
@@ -277,7 +254,6 @@ class JsonDb {
                 * Check if there's actually a result of the query
                 * Makes sure the column  actually exists in the list of columns
             */
-
             list($sort_column, $order_by) = $this->order_by;
             $sort_keys = [];
             $sorted = [];
@@ -287,48 +263,41 @@ class JsonDb {
                 // Save the index and value so we can use them to sort
                 $sort_keys[$index] = $value[$sort_column];
             }
-
             // Let's sort!
             if ($order_by == self::ASC) {
                 asort($sort_keys);
-            }
-            elseif ($order_by == self::DESC) {
+            } elseif ($order_by == self::DESC) {
                 arsort($sort_keys);
             }
-
             // We are done with sorting, lets use the sorted array indexes to pull back the original content and return new content
             foreach ($sort_keys as $index => $value) {
                 $sorted[$index] = ( array )$content[$index];
             }
-
             $content = $sorted;
         }
-
         return $content;
     }
 
     public function get() {
         if ($this->where != null) {
             $content = $this->where_result();
-        }
-        else
+        } else {
             $content = $this->content;
-
+        }
         if ($this->select && !in_array('*', $this->select)) {
             $r = [];
             foreach ($content as $id => $row) {
-                $row = ( array )$row;
+                $row = (array)$row;
                 foreach ($row as $key => $val) {
                     if (in_array($key, $this->select)) {
                         $r[$id][$key] = $val;
-                    }
-                    else
+                    } else {
                         continue;
+                    }
                 }
             }
             $content = $r;
         }
-
         // Finally, lets do sorting :)
         return $this->_process_order_by($content);
     }

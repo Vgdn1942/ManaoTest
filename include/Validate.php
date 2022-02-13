@@ -46,8 +46,7 @@ class Validate {
     private function val_login($value): string {
         if (strlen($value) == 0) {
             return $this->errors['is_empty'];
-        }
-        elseif (strlen($value) < 6) {
+        } elseif (strlen($value) < 6) {
             return $this->errors['small_six'];
         }
         return "";
