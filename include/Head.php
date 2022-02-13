@@ -1,4 +1,5 @@
 <?php
+
 class Head {
     public static function setHead($title) {
         echo <<<EOF

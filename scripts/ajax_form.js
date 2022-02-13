@@ -1,18 +1,18 @@
-$('#login_form').submit(function() {
+$('#login_form').submit(function () {
     sendForm('#login_form', 'login');
     return false;
 });
 
-$('#reg_form').submit(function() {
+$('#reg_form').submit(function () {
     sendForm('#reg_form', 'reg');
     return false;
 });
 
-function sendForm (form, name) {
+function sendForm(form, name) {
     $.post(
         'post.php', // адрес обработчика
         $(form).serialize() + '&form=' + name, // отправляемые данные
-        function(msg) { // получен ответ сервера
+        function (msg) { // получен ответ сервера
             let errorList = JSON.parse(msg); // парсим ответ
             alert(errorList[errorList.length - 1]['result']);
             if (errorList[errorList.length - 1]['result'] === 'error') { // если есть ошибки
@@ -43,7 +43,7 @@ function sendForm (form, name) {
 
 let errorSpan;
 
-function showError (field, message, id) {
+function showError(field, message, id) {
 
     errorSpan = document.createElement("span");
     errorSpan.setAttribute("id", id);

@@ -32,11 +32,13 @@ Head::setHead("Главная страница");
     <form id="login_form">
         <p>
             <label for="login_entry">Логин:<br></label>
-            <input name="login_entry" id="login_entry" type="text" size="24" minlength="6" maxlength="24" required="required">
+            <input name="login_entry" id="login_entry" type="text" size="24" minlength="6" maxlength="24"
+                   required="required">
         </p>
         <p>
             <label for="password_entry">Пароль:<br></label>
-            <input name="password_entry" id="password_entry" type="password" size="24" minlength="6" maxlength="24" required="required">
+            <input name="password_entry" id="password_entry" type="password" size="24" minlength="6" maxlength="24"
+                   required="required">
         </p>
         <br>
         <button type="submit" name="submit">Войти</button>

@@ -1,4 +1,5 @@
 <?php
+
 class Validate {
     private array $field = array('login', 'password', 'email', 'name');
     private array $errors = array(
@@ -10,8 +11,7 @@ class Validate {
         'email_wrong' => " <- Неверный формат email!",
         'email_reg' => " <- Такой email уже существует!",
         'letter_digit' => " <- Пароль должен состоять из цифр и букв!",
-        'confirm_pass' => " <- Пароли не совпадают!",
-    );
+        'confirm_pass' => " <- Пароли не совпадают!",);
 
     /*
     public function __construct($name, $value) {
@@ -28,17 +28,17 @@ class Validate {
                 case "password":
                     echo "i это шоколадка";
                     break;
-                    /*
-                case "confirm":
-                    echo "i это шоколадка";
-                    break;
-                case "email":
-                    echo "i это пирог";
-                    break;
-                case "name":
-                    echo "i это пирог";
-                    break;
-                    */
+                /*
+            case "confirm":
+                echo "i это шоколадка";
+                break;
+            case "email":
+                echo "i это пирог";
+                break;
+            case "name":
+                echo "i это пирог";
+                break;
+                */
             }
         }
     }
@@ -46,7 +46,8 @@ class Validate {
     private function val_login($value): string {
         if (strlen($value) == 0) {
             return $this->errors['is_empty'];
-        } elseif (strlen($value) < 6) {
+        }
+        elseif (strlen($value) < 6) {
             return $this->errors['small_six'];
         }
         return "";
