@@ -7,7 +7,7 @@ class Template {
         echo $html;
     }
 
-    public function getHtml($template_path, $data) {
+    private function getHtml($template_path, $data) {
         if ($data !== NULL) {
             foreach ($data as $key => $value) {
                 $$key = $value;

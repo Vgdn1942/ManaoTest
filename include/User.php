@@ -1,16 +1,16 @@
 <?php
 
 class User {
-    private string $login;
-    private string $passwd;
-    private string $email;
-    private string $name;
+    private $login;
+    private $passwd;
+    private $email;
+    private $name;
 
-    public function __construct($login, $passwd, $email, $name) {
-        $this->login = $login;
-        $this->passwd = $passwd;
-        $this->email = $email;
-        $this->name = $name;
+    public function __construct($_login, $_passwd, $_email, $_name) {
+        $this->login = $_login;
+        $this->passwd = $_passwd;
+        $this->email = $_email;
+        $this->name = $_name;
     }
 
     public function getUser(): array {
@@ -25,4 +25,19 @@ class User {
         return json_encode(self::getUser());
     }
 
+    public function getLogin(): string {
+        return $this->login;
+    }
+
+    public function getPasswd(): string {
+        return $this->passwd;
+    }
+
+    public function getEmail(): string {
+        return $this->email;
+    }
+
+    public function getName(): string {
+        return $this->name;
+    }
 }

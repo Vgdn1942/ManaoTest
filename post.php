@@ -47,33 +47,29 @@ session_start();
 */
 
 require_once('include/JsonDb.php');
+require_once('include/User.php');
 
 try {
     $user_db = new JsonDb("./db/users.json", $create = TRUE);
+    $user = new User($_POST['login'], $_POST['password'], $_POST['email'], $_POST['name']);
+    //$log = $user_db->select('name', 'style');
+    //$log = $user_db->selectAll();
+
+    //$log = json_encode($log);
+    //file_put_contents("log/server.log", $log, FILE_APPEND);
+
+    /*
+    $user = array(
+            'login' => $_POST['login'],
+            'password' => $_POST['password'],
+            'email' => $_POST['email'],
+            'name' => $_POST['name']
+    );
+    */
+
+    $user_db->insert($user->getUser());
 } catch (Exception $e) {
 }
-
-$user = array(
-        'login' => $_POST['login'],
-        'password' => $_POST['password'],
-        'email' => $_POST['email'],
-        'name' => $_POST['name']
-);
-
-//json_encode($user);
-$user_db->insert($user);
-
-
-
-/*
-$user_db->insert(
-    [
-        'login' => $_POST['login'],
-        'password' => $_POST['password'],
-        'email' => $_POST['email'],
-        'name' => $_POST['name']
-    ]);
-*/
 
 $errors = array(
     'no_errors' => "ok",

@@ -1,8 +1,8 @@
 <?php
 
 class Validate {
-    private array $field = array('login', 'password', 'email', 'name');
-    private array $errors = array(
+    private $field = array('login', 'password', 'email', 'name');
+    private $errors = array(
         'is_empty' => " <- Поле не может быть пустым!",
         'small_six' => " <- Длина должна быть больше 6 символов!",
         'small_two' => " <- Длина должна быть больше 2 символов!",

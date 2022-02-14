@@ -1,36 +1,27 @@
 <?php
-
-// Straussn's JSON-Databaseclass
-// Handle JSON-Files like a very, very simple DB. Useful for little ajax applications.
-// Last change: 05-06-2012
-// Version: 1.0b
-// by Manuel Strauss, Web: http://straussn.eu, E-Mail: StrZlee@gmx.net, Skype: StrZlee
-
 /*
-	Example:
+jsonDb = new JsonDB('path/to/file.json', create = false); - подключение к таблице-файлу, если create = true, создаёт файл если его не существовало, иначе выбрасывает исключение
+new mysqli('table')
 
-		$db = new JsonDB( "./path_to_my_jsonfiles/" );
-		$result = $db -> select( "json_file_name_without_extension", "search-key", "search-value" );
+jsonDb->insert('array[]') - Добавляет массив в таблицу, возвращает 'true' в случае успеха
+(INSERT INTO `table` 'array[]')
 
-			Example JSON-File:
-				[
-					{"ID": "0", "Name": "Hans Wurst", "Age": "12"},
-					{"ID": "1", "Name": "Karl Stoascheissa", "Age": "15"},
-					{"ID": "2", "Name": "Poidl Peidlbecka", "Age": "14"}
-				]
+jsonDb->select('key', 'value') - Выбирает все записи из таблицы где 'key' соответствует 'value'
+(SELECT * FROM `table` WHERE `key` = 'value')
 
-		Method Overview:
+jsonDb->selectAll() - возвращает все записи из таблицы
+(SELECT * FROM `table`)
 
-			new JsonDB(".(path_to_my_jsonfiles/");
-			JsonDB -> createTable("hello_world_table");
-			JsonDB -> select ( "table", "key", "value" ) - Selects multiple lines which contains the key/value and returns it as array
-			JsonDB -> selectAll ( "table" )  - Returns the entire file as array
-			JsonDB -> update ( "table", "key", "value", ARRAY ) - Replaces the line which corresponds to the key/value with the array-data
-			JsonDB -> updateAll ( "table", ARRAY ) - Replaces the entire file with the array-data
-			JsonDB -> insert ( "table", ARRAY , $create = FALSE) - Appends a row, returns true on success. if $create is TRUE, we will create the table if it doesn't already exist.
-			JsonDB -> delete ( "table", "key", "value" ) - Deletes all lines which corresponds to the key/value, returns number of deleted lines
-			JsonDB -> deleteAll ( "table" ) - Deletes the whole data, returns "true" on success
-			new JsonTable("./data/test.json", $create = FALSE) - If $create is TRUE, creates table if it doesn't exist.
+jsonDb->update('key', 'value', array[]) - Заменяет строку соответствующую 'key'->'value' на данные из массива 'array'
+(UPDATE `table` SET 'array[]' WHERE `key` = 'value')
+
+jsonDb->updateAll('array[]') - Заменяет все данные в файле массивом 'array[]'
+
+jsonDb->delete('key', 'value') - Удаляет все строки, соответствующие 'key'->'value', возвращает количество удаленных строк
+(DELETE FROM `downloads` WHERE `key` = 'values')
+
+jsonDb->deleteAll() - Удаляет все данные из таблицы-файла, возвращает 'true' в случае успеха
+(TRUNCATE 'table')
 */
 
 class JsonDb {
@@ -45,7 +36,7 @@ class JsonDb {
     public function __construct($_jsonFile, $create = false) {
         if (!file_exists($_jsonFile)) {
             if ($create === true) {
-                $this->createTable($_jsonFile);
+                self::createTable($_jsonFile);
             } else {
                 throw new Exception("JsonTable Error: Table not found: " . $_jsonFile);
             }
@@ -86,7 +77,7 @@ class JsonDb {
         }
     }
 
-    public function selectAll() {
+    public function selectAll(): array {
         return $this->fileData;
     }
 
@@ -116,7 +107,9 @@ class JsonDb {
 
     public function update($key, $val = 0, $newData = array()): bool {
         $result = false;
-        if (is_array($key)) $result = $this->update($key[1], $key[2], $key[3]); else {
+        if (is_array($key)) {
+            $result = $this->update($key[1], $key[2], $key[3]);
+        } else {
             $data = $this->fileData;
             foreach ($data as $_key => $_val) {
                 if (isset($_val[$key])) {
@@ -132,7 +125,7 @@ class JsonDb {
         return $result;
     }
 
-    public function insert($data = array(), $create = false): bool {
+    public function insert($data = array()): bool {
         if (isset($data[0]) && substr_compare($data[0], $this->jsonFile, 0)) {
             $data = $data[1];
         }
@@ -147,7 +140,9 @@ class JsonDb {
 
     public function delete($key, $val = 0): int {
         $result = 0;
-        if (is_array($key)) $result = $this->delete($key[1], $key[2]); else {
+        if (is_array($key)) {
+            $result = $this->delete($key[1], $key[2]);
+        } else {
             $data = $this->fileData;
             foreach ($data as $_key => $_val) {
                 if (isset($_val[$key])) {
@@ -168,16 +163,14 @@ class JsonDb {
     /**
      * @throws Exception
      */
-    public function createTable($tablePath): bool {
+    private function createTable($tablePath): void {
         if (is_array($tablePath)) {
             $tablePath = $tablePath[0];
         }
         if (file_exists($tablePath)) {
             throw new Exception("Table already exists: " . $tablePath);
         }
-        if (fclose(fopen($tablePath, 'a'))) {
-            return true;
-        } else {
+        if (!fclose(fopen($tablePath, 'a'))) {
             throw new Exception("New table couldn't be created: " . $tablePath);
         }
     }
