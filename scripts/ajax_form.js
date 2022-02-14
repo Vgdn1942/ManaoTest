@@ -14,18 +14,16 @@ function sendForm(form, name) {
         $(form).serialize() + '&form=' + name, // отправляемые данные
         function (msg) { // получен ответ сервера
             let errorList = JSON.parse(msg); // парсим ответ
-            alert(errorList[errorList.length - 1]['result']);
-            if (errorList[errorList.length - 1]['result'] === 'error') { // если есть ошибки
-                for (let i = 0; i < errorList.length - 1; i++) { // проходим в цикле по ошибкам
-                    let id = name + errorList[i]['0']; // создаём уникальный id
-                    if (document.getElementById(id)) { // удаляем элемент, если он уже был отображён
-                        document.getElementById(id).remove();
-                    }
-                    if (errorList[i]['1'] !== 'ok') { // если есть ошибки выводим их напротив соответствующего поля
-                        if (!document.getElementById(id)) { // если ошибка ещё не отображена
-                            //alert("1: " + errorList[i]['0'] + "; 2: " + errorList[i]['1'] + "; id: " + id);
-                            showError(errorList[i]['0'], errorList[i]['1'], id);
-                        }
+            //alert(errorList[errorList.length - 1]['result']);
+            for (let i = 0; i < errorList.length; i++) { // проходим в цикле по ошибкам
+                let id = name + errorList[i]['0']; // создаём уникальный id
+                if (document.getElementById(id)) { // удаляем элемент, если он уже был отображён
+                    document.getElementById(id).remove();
+                }
+                if (errorList[i]['1'] !== 'ok') { // если есть ошибки выводим их напротив соответствующего поля
+                    if (!document.getElementById(id)) { // если ошибка ещё не отображена
+                        //alert("1: " + errorList[i]['0'] + "; 2: " + errorList[i]['1'] + "; id: " + id);
+                        showError(errorList[i]['0'], errorList[i]['1'], id);
                     }
                 }
             }

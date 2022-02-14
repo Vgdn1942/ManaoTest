@@ -7,6 +7,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit();
 }
+session_start();
 /*
 Поле login: (unique)    [валидация : минимум 6 символов ]
 +        1. Оставить поле незаполненным и попытаться отправить форму.
@@ -45,22 +46,33 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     Проверить ввод имени только из пробелов .
 */
 
-//include_once 'include/JsonDb.php';
-//include( 'include/JsonDb.php' );
 require_once('include/JsonDb.php');
-//$json_db = new JsonDb($_SERVER['DOCUMENT_ROOT'] . "/db/");
-//$json_db = new JsonDb();
-/*
+
 try {
-    $json_db->insert('users.json',
-        [
-            'login' => $_POST['login'],
-            'password' => $_POST['password'],
-            'email' => $_POST['email'],
-            'name' => $_POST['name']
-        ]);
+    $user_db = new JsonDb("./db/users.json", $create = TRUE);
 } catch (Exception $e) {
 }
+
+$user = array(
+        'login' => $_POST['login'],
+        'password' => $_POST['password'],
+        'email' => $_POST['email'],
+        'name' => $_POST['name']
+);
+
+//json_encode($user);
+$user_db->insert($user);
+
+
+
+/*
+$user_db->insert(
+    [
+        'login' => $_POST['login'],
+        'password' => $_POST['password'],
+        'email' => $_POST['email'],
+        'name' => $_POST['name']
+    ]);
 */
 
 $errors = array(
@@ -74,9 +86,8 @@ $errors = array(
     'email_wrong' => " <- Неверный формат email!",
     'email_reg' => " <- Такой email уже существует!",
     'letter_digit' => " <- Пароль должен состоять только из цифр и букв!",
-    'confirm_pass' => " <- Пароли не совпадают!");
-
-$data['result'] = 'success';
+    'confirm_pass' => " <- Пароли не совпадают!"
+);
 
 $result = array();
 $form = $_POST['form'];
@@ -106,21 +117,7 @@ if (strlen($login_str) == 0) { // проверка на нулевую длин�
 $result[] = $login;
 
 // password
-if (strlen($pass_str) == 0) { // проверка на нулевую длину
-    $password = array($pass_id, $errors['is_empty']);
-} elseif (ctype_space($pass_str)) { // проверка на отправку формы только из пробелов
-    $password = array($pass_id, $errors['all_space']);
-} elseif (strlen($pass_str) < 6) { // проверка на количество символов
-    $password = array($pass_id, $errors['small_six']);
-} elseif (strripos($pass_str, ' ') !== false) { // проверка на содержание пробелов
-    $password = array($pass_id, $errors['is_space']);
-} elseif (!ctype_alnum($pass_str)) { // проверка на спецсимволы
-    $password = array($pass_id, $errors['letter_digit']);
-} elseif (ctype_alpha($pass_str) || ctype_digit($pass_str)) { // проверка на цифры и буквы
-    $password = array($pass_id, $errors['letter_digit']);
-} else { // ошибок нет
-    $password = array($pass_id, $errors['no_errors']);
-}
+$password = array($pass_id, $errors['no_errors']);
 $result[] = $password;
 
 if ($form == 'reg') {
@@ -129,9 +126,7 @@ if ($form == 'reg') {
     $name_str = $_POST['name'];
 
     // confirm
-    if (strlen($confirm_str) == 0) { // проверка на нулевую длину
-        $confirm = array('confirm', $errors['is_empty']);
-    } elseif ($confirm_str !== $pass_str) { // проверка на совпадение паролей
+    if ($confirm_str !== $pass_str) { // проверка на совпадение паролей
         $confirm = array('confirm', $errors['confirm_pass']);
     } else { // ошибок нет
         $confirm = array('confirm', $errors['no_errors']);
@@ -139,30 +134,12 @@ if ($form == 'reg') {
     $result[] = $confirm;
 
     // email
-    if (strlen($email_str) == 0) { // проверка на нулевую длину
-        $email = array('email', $errors['is_empty']);
-    } elseif (!filter_var($email_str, FILTER_VALIDATE_EMAIL)) { // проверка на email
-        $email = array('email', $errors['email_wrong']);
-    } else { // ошибок нет
-        $email = array('email', $errors['no_errors']);
-    }
+    $email = array('email', $errors['no_errors']);
     $result[] = $email;
 
-    if (strlen($name_str) == 0) { // проверка на нулевую длину
-        $name = array('name', $errors['is_empty']);
-    } elseif (ctype_space($name_str)) { // проверка на отправку формы только из пробелов
-        $name = array('name', $errors['all_space']);
-    } elseif (strlen($name_str) < 2) { // проверка на количество символов
-        $name = array('name', $errors['small_two']);
-    } elseif (strripos($name_str, ' ') !== false) { // проверка на содержание пробелов
-        $name = array('name', $errors['is_space']);
-    } else {
-        $name = array('name', $errors['no_errors']);
-    }
+    // name
+    $name = array('name', $errors['no_errors']);
     $result[] = $name;
 }
 
-$data['result'] = 'error';
-
-$result[] = $data;
 echo json_encode($result);
