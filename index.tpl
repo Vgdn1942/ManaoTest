@@ -12,8 +12,8 @@
                pattern="^(?=.*\d)(?=.*[a-zA-Z])(?!.*\s).*$" required>
     </p>
     <p>
-        <label for="confirm">Подверждение пароля:<br></label>
-        <input name="confirm" id="confirm" type="password" size="32" maxlength="32"
+        <label for="confirm_password">Подверждение пароля:<br></label>
+        <input name="confirm" id="confirm_password" type="password" size="32" maxlength="32"
                placeholder="Подтвердите пароль" required>
     </p>
     <p>

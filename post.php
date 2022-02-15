@@ -3,11 +3,11 @@
 if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != 'XMLHttpRequest') {
     exit();
 }
-// обработка данных, посланных только методом POST (при остальных методах завершаем выполнение скрипта)
+// обработка данных, полученых только методом POST (при остальных методах завершаем выполнение скрипта)
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit();
 }
-session_start();
+
 /*
 Поле login: (unique)    [валидация : минимум 6 символов ]
 +        1. Оставить поле незаполненным и попытаться отправить форму.
@@ -50,13 +50,55 @@ require_once('include/JsonDb.php');
 require_once('include/User.php');
 
 try {
-    $user_db = new JsonDb("./db/users.json", $create = TRUE);
+    $user_db = new JsonDb("./db/users.json");
+} catch (Exception $e) {}
+
+function is_exists($key, $value, $db): bool {
+    return count($db->select($key, $value)) !== 0;
+}
+
+if (isset($_POST['form']) && $_POST['form'] == 'login') { // если данные отправлены из формы входа
+    if (isset($_POST['login_entry']) && isset($_POST['password_entry'])) {
+        $login = htmlspecialchars($_POST['login_entry']);
+        $password = htmlspecialchars($_POST['password_entry']);
+        if (is_exists('login', $login, $user_db)) {
+            session_start();
+            $_SESSION['login'] = $login;
+        }
+    }
+} else { // $form == 'reg' // если данные отправлены из формы регистрации
+    // проверяем присутствие всех данных из формы
+    if (isset($_POST['login']) && isset($_POST['password']) && isset($_POST['confirm_password']) && isset($_POST['email']) && isset($_POST['name'])) {
+        $login = htmlspecialchars($_POST['login']); // защита от передачи скриптов в запросе
+        $password = htmlspecialchars($_POST['password']);
+        $pass_hash = password_hash($password, PASSWORD_DEFAULT);
+        if ($pass_hash) {
+            exit("Ошибка создания хэша пароля!");
+        }
+        $confirm_password = htmlspecialchars($_POST['confirm_password']);
+        $confirm_hash = password_hash($confirm_password, PASSWORD_DEFAULT);
+        if ($confirm_hash) {
+            exit("Ошибка создания хэша пароля!");
+        }
+        $email = htmlspecialchars($_POST['email']); // защита от передачи скриптов в запросе
+        $name = htmlspecialchars($_POST['name']); // защита от передачи скриптов в запросе
+    } else {
+        exit(); // если каких-то данных нет, роскомнадзорнуемся
+    }
+}
+
+/// ToDo remove this code
+try {
     $user = new User($_POST['login'], $_POST['password'], $_POST['email'], $_POST['name']);
-    //$log = $user_db->select('name', 'style');
+
+    $log = $user_db->select('login', $_POST['login']);
+    //$us = $user->getName();
     //$log = $user_db->selectAll();
 
     //$log = json_encode($log);
-    //file_put_contents("log/server.log", $log, FILE_APPEND);
+    $log = is_exists('login', $_POST['login'], $user_db);
+    //$log = count($log);
+    file_put_contents("log/server.log", $log ? "true" : "false", FILE_APPEND);
 
     /*
     $user = array(
@@ -67,9 +109,10 @@ try {
     );
     */
 
-    $user_db->insert($user->getUser());
+    //$user_db->insert($user->getUser());
 } catch (Exception $e) {
 }
+
 
 $errors = array(
     'no_errors' => "ok",
@@ -138,4 +181,4 @@ if ($form == 'reg') {
     $result[] = $name;
 }
 
-echo json_encode($result);
+echo json_encode($result); // отправляем результат

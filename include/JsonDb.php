@@ -33,7 +33,7 @@ class JsonDb {
     /**
      * @throws Exception
      */
-    public function __construct($_jsonFile, $create = false) {
+    public function __construct($_jsonFile, $create = true) {
         if (!file_exists($_jsonFile)) {
             if ($create === true) {
                 self::createTable($_jsonFile);
