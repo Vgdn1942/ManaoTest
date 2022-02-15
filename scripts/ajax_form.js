@@ -13,6 +13,7 @@ function sendForm(form, name) {
         'post.php', // адрес обработчика
         $(form).serialize() + '&form=' + name, // отправляемые данные
         function (msg) { // получен ответ сервера
+            /*
             let errorList = JSON.parse(msg); // парсим ответ
             //alert(errorList[errorList.length - 1]['result']);
             for (let i = 0; i < errorList.length; i++) { // проходим в цикле по ошибкам
@@ -27,6 +28,7 @@ function sendForm(form, name) {
                     }
                 }
             }
+             */
             $('#results').html(msg);
         }
     );
