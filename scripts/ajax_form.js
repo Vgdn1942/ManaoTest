@@ -15,6 +15,15 @@ function sendForm(form, name) {
         'post.php', // адрес обработчика
         $(form).serialize() + '&form=' + name, // отправляемые данные
         function (msg) { // получен ответ сервера
+            let data = JSON.parse(msg);
+            for (const error in data) {
+                if (error === 'result') {
+                    continue;
+                }
+                //alert("Error: " + error + "; error_data: " + data[error]);
+                showError(error, data[error]);
+            }
+            // result => error; login_entry => "текст ошибка"
             /*
             let errorList = JSON.parse(msg); // парсим ответ
             //alert(errorList[errorList.length - 1]['result']);
@@ -32,6 +41,9 @@ function sendForm(form, name) {
             }
              */
             $('#results').html(msg);
+            if (name === 'login' && data['result'] === 'success') {
+                location.href = "index.php";
+            }
         }
     );
 }
@@ -45,10 +57,10 @@ function sendForm(form, name) {
 
 let errorSpan;
 
-function showError(field, message, id) {
+function showError(field, message) {
 
     errorSpan = document.createElement("span");
-    errorSpan.setAttribute("id", id);
+    //errorSpan.setAttribute("id", id);
     const errorMessage = document.createTextNode(message);
 
     errorSpan.appendChild(errorMessage);

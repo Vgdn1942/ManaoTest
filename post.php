@@ -62,32 +62,42 @@ function is_exists($key, $value, $db): bool {
 }
 
 $errors = array(
-    'no_errors' => "ok",
     'is_empty' => " <- Поле не может быть пустым!",
     'small_six' => " <- Длина должна быть больше 6 символов!",
     'small_two' => " <- Длина должна быть больше 2 символов!",
     'is_space' => " <- Поле не должно содержать пробелы!",
     'all_space' => " <- Поле не может быть состоять только из пробелов!",
     'user_reg' => " <- Такой пользователь уже зарегистрирован!",
+    'user_not' => " <- Такого пользователя не существует!",
     'email_wrong' => " <- Неверный формат email!",
     'email_reg' => " <- Такой E-mail уже зарегистрирован!",
     'letter_digit' => " <- Пароль должен состоять только из цифр и букв!",
     'confirm_pass' => " <- Пароли не совпадают!",
+    'pass_not' => " <- Неверный пароль!",
     'hash_pass' => " <- Ошибка создания хэша пароля!");
 
-$result = array();
-
-if (isset($_POST['form'])) {
-    $form = $_POST['form'];
-}
+$data['result'] = 'success';
 
 if ($_POST['form'] == 'login') { // если данные отправлены из формы входа
     if (isset($_POST['login_entry']) && isset($_POST['password_entry'])) {
         $login = htmlspecialchars($_POST['login_entry']);
         $password = htmlspecialchars($_POST['password_entry']);
-        if (is_exists('login', $login, $user_db)) {
-            session_start();
-            $_SESSION['login'] = $login;
+        if (is_exists('login', $login, $user_db)) { // если пользователь есть в базе
+            $user = $user_db->select('login', $login);
+            $user_hash = $user['passwd']; // получаем из базы хэш его пароля
+            // todo remove log
+            file_put_contents("log/server.log", ' Pass hash: ' . implode("|",$user), FILE_APPEND);
+            if (password_verify($password, $user_hash)) { // если пароль совпадает с хэшем запускаем сессию
+                session_start();
+                $_SESSION['login'] = $login;
+                $_SESSION['name'] = $login;
+            } else {
+                $data['password_entry'] = $errors['pass_not'];
+                $data['result'] = 'error';
+            }
+        } else {
+            $data['login_entry'] = $errors['user_not'];
+            $data['result'] = 'error';
         }
         //todo remove log
         file_put_contents("log/server.log", ' Sign in ok \n', FILE_APPEND);
@@ -95,74 +105,60 @@ if ($_POST['form'] == 'login') { // если данные отправлены �
 } elseif ($_POST['form'] == 'reg') { // $form == 'reg' // если данные отправлены из формы регистрации
     // проверяем присутствие всех данных из формы
     if (isset($_POST['login']) && isset($_POST['password']) && isset($_POST['confirm']) && isset($_POST['email']) && isset($_POST['name'])) {
-        $res = true;
+
         // login
         $login = htmlspecialchars($_POST['login']); // защита от передачи скриптов в запросе
         if (is_exists('login', $login, $user_db)) {
-            $login_err = array('login', $errors['user_reg']);
-            $res = false;
-        } else {
-            $login_err = array('login', $errors['no_errors']);
+            $data['login'] = $errors['user_reg'];
+            $data['result'] = 'error';
         }
         // todo remove log
-        file_put_contents("log/server.log", " res_login: " . $res ? "true; " : "false; ", FILE_APPEND);
-        $result[] = $login_err;
+        file_put_contents("log/server.log", " result_login: " . $data['result'], FILE_APPEND);
+
         // password
         $password = htmlspecialchars($_POST['password']);
         $pass_hash = password_hash($password, PASSWORD_DEFAULT);
         if (!$pass_hash) {
-            $pass_err = array('password', $errors['hash_pass']);
-            $res = false;
-        } else {
-            $pass_err = array('password', $errors['no_errors']);
+            $data['password'] = $errors['hash_pass'];
+            $data['result'] = 'error';
         }
         // todo remove log
-        file_put_contents("log/server.log", " res_pass: " . $res ? "true; " : "false; ", FILE_APPEND);
-        $result[] = $pass_err;
+        file_put_contents("log/server.log", " result_pass: " . $data['result'], FILE_APPEND);
+
         // confirm
         $confirm = htmlspecialchars($_POST['confirm']);
         $confirm_hash = password_hash($confirm, PASSWORD_DEFAULT);
         if (!$confirm_hash) {
-            $confirm_err = array('confirm', $errors['hash_pass']);
-            $res = false;
+            $data['confirm'] = $errors['hash_pass'];
+            $data['result'] = 'error';
         } elseif ($password !== $confirm) {
-            $confirm_err = array('confirm', $errors['confirm_pass']);
-            $res = false;
-        } else { // ошибок нет
-            $confirm_err = array('confirm', $errors['no_errors']);
+            $data['confirm'] = $errors['confirm_pass'];
+            $data['result'] = 'error';
         }
         // todo remove log
-        file_put_contents("log/server.log", " res_conf: " . $res ? "true; " : "false; ", FILE_APPEND);
-        $result[] = $confirm_err;
+        file_put_contents("log/server.log", " result_confirm: " . $data['result'], FILE_APPEND);
+
         // email
         $email = htmlspecialchars($_POST['email']); // защита от передачи скриптов в запросе
         if (is_exists('email', $email, $user_db)) {
-            $email_err = array('email', $errors['email_reg']);
-            $res = false;
-        } else {
-            $email_err = array('email', $errors['no_errors']);
+            $data['email'] = $errors['email_reg'];
+            $data['result'] = 'error';
         }
         // todo remove log
         file_put_contents("log/server.log", " res_email: " . $res ? "true; " : "false; ", FILE_APPEND);
-        $result[] = $email_err;
+
         // name
         $name = htmlspecialchars($_POST['name']); // защита от передачи скриптов в запросе
-        $name_err = array('name', $errors['no_errors']);
-        // todo remove log
-        file_put_contents("log/server.log", " res_name: " . $res ? "true; " : "false; ", FILE_APPEND);
-        $result[] = $name_err;
-        if ($res) { // если ошибок нет
+
+        if ($data['result'] == 'success') { // если ошибок нет
             $user_new = new User($login, $pass_hash, $email, $name);
             $user_db->insert($user_new->getUser());
         }
     } else {
-        //todo remove log
+        // todo remove log
         file_put_contents("log/server.log", " not any data ", FILE_APPEND);
-        //exit(); // если каких-то данных нет, роскомнадзорнуемся
+        exit(); // если каких-то данных нет, роскомнадзорнуемся
     }
 }
 
-/// ToDo remove this code
-$result = array();
-
-echo json_encode($result); // отправляем результат
+echo json_encode($data); // отправляем результат

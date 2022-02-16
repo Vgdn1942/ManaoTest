@@ -2,27 +2,39 @@
 require_once('include/Template.php');
 require_once('include/User.php');
 
+session_start();
+
 if (isset($_GET["logout"])) {
-    if (isset($_SESSION['login'])) {
-        unset($_SESSION['login']);
-    }
-    header('Location: /');
+    unset($_SESSION['login']);
+    unset($_SESSION['name']);
+    header("Location: " . $_SERVER['HTTP_REFERER']);
     exit();
 }
 
 function is_user_logged(): bool {
-    session_start();
     return isset($_SESSION['login']);
-    //return true;
 }
-
-$user = new User('Test_login', 'Test_passwd', 'Test_email', 'Test_name');
 
 $tpl_array = array(
     'title' => 'Главная страница',
-    'hello' => "Hello, " . $user->getName()
+    'hello' => "Hello, " . $_SESSION['name']
 );
+/*
+if (is_user_logged()) {
+    $tpl_array = array(
+        'title' => 'Главная страница',
+        'hello' => "Hello, " . $_SESSION['name']
+    );
+    Template::showTemplate('head.tpl', $tpl_array);
 
+} else {
+    $tpl_array = array(
+        'title' => 'Главная страница'
+    );
+    Template::showTemplate('head.tpl', $tpl_array);
+
+}
+*/
 Template::showTemplate('head.tpl', $tpl_array);
 
 if (is_user_logged()) {

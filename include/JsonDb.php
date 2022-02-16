@@ -90,11 +90,13 @@ class JsonDb {
             foreach ($data as $_val) {
                 if (isset($_val[$key])) {
                     if ($_val[$key] == $val) {
+                        file_put_contents("log/server.log", ' Json start: ' . json_encode($_val) . ' Json_2: ' . $key . ' Json end', FILE_APPEND);
                         $result[] = $_val;
                     }
                 }
             }
         }
+        file_put_contents("log/server.log", ' Json result: ' . json_encode($result), FILE_APPEND);
         return $result;
     }
 

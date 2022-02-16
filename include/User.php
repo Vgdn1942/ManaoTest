@@ -29,7 +29,7 @@ class User {
         return $this->login;
     }
 
-    public function getPasswd(): string {
+    public function getHash(): string {
         return $this->passwd;
     }
 
