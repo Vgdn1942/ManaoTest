@@ -9,6 +9,12 @@ jsonDb->insert('array[]') - Добавляет массив в таблицу, �
 jsonDb->select('key', 'value') - Выбирает все записи из таблицы где 'key' соответствует 'value'
 (SELECT * FROM `table` WHERE `key` = 'value')
 
+jsonDb->selectRow('key', 'value', 'row') - Возвращает строку 'row' из таблицы где 'key' соответствует 'value'
+// аналог
+$res = $conn->query("SELECT * FROM `table` WHERE `key` = 'value'");
+$row = $res->fetch_array();
+return $row['row']
+
 jsonDb->selectAll() - возвращает все записи из таблицы
 (SELECT * FROM `table`)
 
@@ -90,13 +96,24 @@ class JsonDb {
             foreach ($data as $_val) {
                 if (isset($_val[$key])) {
                     if ($_val[$key] == $val) {
-                        file_put_contents("log/server.log", ' Json start: ' . json_encode($_val) . ' Json_2: ' . $key . ' Json end', FILE_APPEND);
                         $result[] = $_val;
                     }
                 }
             }
         }
-        file_put_contents("log/server.log", ' Json result: ' . json_encode($result), FILE_APPEND);
+        return $result;
+    }
+
+    public function selectRow($key, $val, $row): string {
+        $result = '';
+        $data = $this->fileData;
+        foreach ($data as $_val) {
+            if (isset($_val[$key])) {
+                if ($_val[$key] == $val) {
+                    $result = $_val[$row];
+                }
+            }
+        }
         return $result;
     }
 

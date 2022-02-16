@@ -18,7 +18,8 @@ class User {
             'login' => $this->login,
             'passwd' => $this->passwd,
             'email' => $this->email,
-            'name' => $this->name);
+            'name' => $this->name
+        );
     }
 
     public function getUserJson() {
