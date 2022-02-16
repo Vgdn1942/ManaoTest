@@ -52,6 +52,8 @@ require_once('include/User.php');
 try {
     $user_db = new JsonDb("./db/users.json");
 } catch (Exception $e) {
+    //todo remove log
+    file_put_contents("log/server.log", ' Exception ' . $e, FILE_APPEND);
     exit($e);
 }
 
@@ -102,7 +104,8 @@ if ($_POST['form'] == 'login') { // если данные отправлены �
         } else {
             $login_err = array('login', $errors['no_errors']);
         }
-        file_put_contents("log/server.log", ' res: ' . $res, FILE_APPEND);
+        // todo remove log
+        file_put_contents("log/server.log", " res_login: " . $res ? "true; " : "false; ", FILE_APPEND);
         $result[] = $login_err;
         // password
         $password = htmlspecialchars($_POST['password']);
@@ -113,6 +116,8 @@ if ($_POST['form'] == 'login') { // если данные отправлены �
         } else {
             $pass_err = array('password', $errors['no_errors']);
         }
+        // todo remove log
+        file_put_contents("log/server.log", " res_pass: " . $res ? "true; " : "false; ", FILE_APPEND);
         $result[] = $pass_err;
         // confirm
         $confirm = htmlspecialchars($_POST['confirm']);
@@ -126,6 +131,8 @@ if ($_POST['form'] == 'login') { // если данные отправлены �
         } else { // ошибок нет
             $confirm_err = array('confirm', $errors['no_errors']);
         }
+        // todo remove log
+        file_put_contents("log/server.log", " res_conf: " . $res ? "true; " : "false; ", FILE_APPEND);
         $result[] = $confirm_err;
         // email
         $email = htmlspecialchars($_POST['email']); // защита от передачи скриптов в запросе
@@ -135,36 +142,24 @@ if ($_POST['form'] == 'login') { // если данные отправлены �
         } else {
             $email_err = array('email', $errors['no_errors']);
         }
+        // todo remove log
+        file_put_contents("log/server.log", " res_email: " . $res ? "true; " : "false; ", FILE_APPEND);
         $result[] = $email_err;
         // name
         $name = htmlspecialchars($_POST['name']); // защита от передачи скриптов в запросе
         $name_err = array('name', $errors['no_errors']);
+        // todo remove log
+        file_put_contents("log/server.log", " res_name: " . $res ? "true; " : "false; ", FILE_APPEND);
         $result[] = $name_err;
         if ($res) { // если ошибок нет
             $user_new = new User($login, $pass_hash, $email, $name);
-            $user_db->insert($user_new);
+            $user_db->insert($user_new->getUser());
         }
     } else {
         //todo remove log
-        file_put_contents("log/server.log", 'enter_1', FILE_APPEND);
+        file_put_contents("log/server.log", " not any data ", FILE_APPEND);
         //exit(); // если каких-то данных нет, роскомнадзорнуемся
     }
-}
-
-if (isset($_POST['login'])) {
-    file_put_contents("log/server.log", ' login ' . $_POST['login'], FILE_APPEND);
-}
-if (isset($_POST['password'])) {
-    file_put_contents("log/server.log", ' password ' . $_POST['password'], FILE_APPEND);
-}
-if (isset($_POST['confirm'])) {
-    file_put_contents("log/server.log", ' confirm ' . $_POST['confirm'], FILE_APPEND);
-}
-if (isset($_POST['email'])) {
-    file_put_contents("log/server.log", ' email ' . $_POST['email'], FILE_APPEND);
-}
-if (isset($_POST['name'])) {
-    file_put_contents("log/server.log", ' name ' . $_POST['name'], FILE_APPEND);
 }
 
 /// ToDo remove this code

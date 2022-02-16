@@ -9,6 +9,8 @@ $('#reg_form').submit(function () {
 });
 
 function sendForm(form, name) {
+    // todo remove debug
+    //alert($(form).serialize() + '&form=' + name);
     $.post(
         'post.php', // адрес обработчика
         $(form).serialize() + '&form=' + name, // отправляемые данные
