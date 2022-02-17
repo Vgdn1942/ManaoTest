@@ -23,6 +23,15 @@ function is_exists($key, $value, $db): bool {
     return count($db->select($key, $value)) !== 0;
 }
 
+function generateSalt(): string {
+    $salt = '';
+    $saltLength = 8; // длина соли
+    for ($i = 0; $i < $saltLength; $i++) {
+        $salt .= chr(mt_rand(33, 126)); // символ из ASCII-table
+    }
+    return $salt;
+}
+
 $errors = array(
     'user_reg' => " <- Такой пользователь уже зарегистрирован!",
     'user_not' => " <- Такого пользователя не существует!",
@@ -34,72 +43,92 @@ $errors = array(
 
 $data['result'] = 'success';
 
-if ($_POST['form'] == 'login') { // если данные отправлены из формы входа
-    if (isset($_POST['login_entry']) && isset($_POST['password_entry'])) {
-        $login = htmlspecialchars($_POST['login_entry']);
-        $password = htmlspecialchars($_POST['password_entry']);
-        if (is_exists('login', $login, $user_db)) { // если пользователь есть в базе
-            $user_hash = $user_db->selectRow('login', $login, 'passwd');
-            if (password_verify($password, $user_hash)) { // если пароль совпадает с хэшем запускаем сессию
-                session_start();
-                $_SESSION['login'] = $login;
-                $_SESSION['name'] = $login;
+if (isset($_POST['form'])) {
+    $form = htmlspecialchars($_POST['form']);
+    if ($form == 'login') { // если данные отправлены из формы входа
+        if (isset($_POST['login_entry']) && isset($_POST['password_entry'])) {
+            $login = htmlspecialchars($_POST['login_entry']);
+            $password = htmlspecialchars($_POST['password_entry']);
+            if (is_exists('login', $login, $user_db)) { // если пользователь есть в базе
+                $user_hash = $user_db->selectRow('login', $login, 'passwd'); // получаем его хэш пароля
+                if (password_verify($password, $user_hash)) { // если пароль совпадает с хэшем запускаем сессию
+                    session_start();
+                    $user = $user_db->select('login', $login);
+                    //$_SESSION['login'] = $login;
+                    //$_SESSION['name'] = $user_db->selectRow('login', $login, 'name');
+                    foreach ($user as $key => $val) {
+                        $_SESSION[$key] = $val;
+                    }
+                    // cookie
+                    //if (!empty($_REQUEST['remember']) and $_REQUEST['remember'] == 1) {
+                    if (false) {
+                        // Сформируем случайную строку для куки (используем функцию generateSalt):
+                        $key = generateSalt(); // назовем ее $key
+                        // Пишем куки (имя куки, значение, время жизни - сейчас+месяц)
+                        setcookie('login', $login, time() + 60 * 60 * 24 * 30); // логин
+                        setcookie('key', $key, time() + 60 * 60 * 24 * 30); // случайная строка
+                        /*
+                            Пишем эту же куку в базу данных для данного юзера.
+                            Формируем и отсылаем SQL запрос:
+                            ОБНОВИТЬ  таблицу_users УСТАНОВИТЬ cookie = $key ГДЕ login=$login.
+                        */
+                        $user[] = array('cookie' => $key);
+                        //$user += ['cookie' => $key];
+                        $user_db->update('login', $login, $user);
+                    }
+                    // cookie
+                } else {
+                    $data['password_entry'] = $errors['pass_not'];
+                    $data['result'] = 'error';
+                }
             } else {
-                $data['password_entry'] = $errors['pass_not'];
+                $data['login_entry'] = $errors['user_not'];
                 $data['result'] = 'error';
             }
+        }
+    } elseif ($form == 'reg') { // $form == 'reg' // если данные отправлены из формы регистрации
+        // проверяем присутствие всех данных из формы
+        if (isset($_POST['login']) && isset($_POST['password']) && isset($_POST['confirm']) && isset($_POST['email']) && isset($_POST['name'])) {
+            // login
+            $login = htmlspecialchars($_POST['login']); // защита от передачи скриптов в запросе
+            if (is_exists('login', $login, $user_db)) {
+                $data['login'] = $errors['user_reg'];
+                $data['result'] = 'error';
+            }
+            // password
+            $password = htmlspecialchars($_POST['password']);
+            $pass_hash = password_hash($password, PASSWORD_DEFAULT);
+            if (!$pass_hash) {
+                $data['password'] = $errors['hash_not'];
+                $data['result'] = 'error';
+            }
+            // confirm
+            $confirm = htmlspecialchars($_POST['confirm']);
+            if ($password !== $confirm) {
+                $data['confirm'] = $errors['confirm_not'];
+                $data['result'] = 'error';
+            }
+            // email
+            $email = htmlspecialchars($_POST['email']); // защита от передачи скриптов в запросе
+            if (is_exists('email', $email, $user_db)) {
+                $data['email'] = $errors['email_reg'];
+                $data['result'] = 'error';
+            }
+            // name
+            $name = htmlspecialchars($_POST['name']); // защита от передачи скриптов в запросе
+            // add user
+            if ($data['result'] == 'success') { // если ошибок нет, то добавляем пользователя в базу
+                $user_new = new User($login, $pass_hash, $email, $name);
+                $user_db->insert($user_new->getUser());
+            }
         } else {
-            $data['login_entry'] = $errors['user_not'];
             $data['result'] = 'error';
+            exit(); // если каких-то данных нет, роскомнадзорнуемся
         }
     }
-} elseif ($_POST['form'] == 'reg') { // $form == 'reg' // если данные отправлены из формы регистрации
-    // проверяем присутствие всех данных из формы
-    if (isset($_POST['login']) && isset($_POST['password']) && isset($_POST['confirm']) && isset($_POST['email']) && isset($_POST['name'])) {
-
-        // login
-        $login = htmlspecialchars($_POST['login']); // защита от передачи скриптов в запросе
-        if (is_exists('login', $login, $user_db)) {
-            $data['login'] = $errors['user_reg'];
-            $data['result'] = 'error';
-        }
-
-        // password
-        $password = htmlspecialchars($_POST['password']);
-        $pass_hash = password_hash($password, PASSWORD_DEFAULT);
-        if (!$pass_hash) {
-            $data['password'] = $errors['hash_not'];
-            $data['result'] = 'error';
-        }
-
-        // confirm
-        $confirm = htmlspecialchars($_POST['confirm']);
-        $confirm_hash = password_hash($confirm, PASSWORD_DEFAULT);
-        if (!$confirm_hash) {
-            $data['confirm'] = $errors['hash_not'];
-            $data['result'] = 'error';
-        } elseif ($password !== $confirm) {
-            $data['confirm'] = $errors['confirm_not'];
-            $data['result'] = 'error';
-        }
-
-        // email
-        $email = htmlspecialchars($_POST['email']); // защита от передачи скриптов в запросе
-        if (is_exists('email', $email, $user_db)) {
-            $data['email'] = $errors['email_reg'];
-            $data['result'] = 'error';
-        }
-
-        // name
-        $name = htmlspecialchars($_POST['name']); // защита от передачи скриптов в запросе
-
-        if ($data['result'] == 'success') { // если ошибок нет, то добавляем пользователя в базу
-            $user_new = new User($login, $pass_hash, $email, $name);
-            $user_db->insert($user_new->getUser());
-        }
-    } else {
-        exit(); // если каких-то данных нет, роскомнадзорнуемся
-    }
+} else {
+    $data['result'] = 'error';
+    exit(); // если каких-то данных нет, роскомнадзорнуемся
 }
 
 echo json_encode($data); // отправляем результат

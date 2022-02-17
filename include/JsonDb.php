@@ -96,7 +96,15 @@ class JsonDb {
             foreach ($data as $_val) {
                 if (isset($_val[$key])) {
                     if ($_val[$key] == $val) {
-                        $result[] = $_val;
+                        // add
+                        foreach ($_val as $key) { // проверка на вложенный массив
+                            if (is_array($key)) {
+                                return $key;
+                            } else {
+                                return $_val;
+                            }
+                        }
+                        break;
                     }
                 }
             }
