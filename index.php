@@ -20,12 +20,12 @@ $tpl_array = array(
     'hello' => "Hello, " . $_SESSION['name']
 );
 
-Template::showTemplate('head.tpl', $tpl_array);
+Template::showTemplate('html/head.tpl', $tpl_array);
 
 if (is_user_logged()) {
-    Template::showTemplate('hello.tpl', $tpl_array);
+    Template::showTemplate('html/hello.tpl', $tpl_array);
 } else {
-    Template::showTemplate('index.tpl');
+    Template::showTemplate('html/index.tpl');
 }
 
-Template::showTemplate('footer.tpl');
+Template::showTemplate('html/footer.tpl');

@@ -1,10 +1,12 @@
 <?php
 // обработка только ajax запросов (при других запросах завершаем выполнение скрипта)
 if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != 'XMLHttpRequest') {
+    header("HTTP/1.0 404 Not Found");
     exit();
 }
 // обработка данных, полученых только методом POST (при остальных методах завершаем выполнение скрипта)
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+    header("HTTP/1.0 404 Not Found");
     exit();
 }
 
