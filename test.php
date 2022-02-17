@@ -9,8 +9,8 @@ try {
     exit($e);
 }
 
-//$user = $user_db->select('login', 'Vgdn1942');
-$user = $user_db->select('login', 'test123');
+$user = $user_db->select('login', 'Vgdn1942');
+//$user = $user_db->select('login', 'test123');
 
 
 //print_r($user);

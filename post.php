@@ -61,20 +61,15 @@ if (isset($_POST['form'])) {
                     }
                     // cookie
                     //if (!empty($_REQUEST['remember']) and $_REQUEST['remember'] == 1) {
-                    if (false) {
+                    if (true) {
                         // Сформируем случайную строку для куки (используем функцию generateSalt):
                         $key = generateSalt(); // назовем ее $key
                         // Пишем куки (имя куки, значение, время жизни - сейчас+месяц)
                         setcookie('login', $login, time() + 60 * 60 * 24 * 30); // логин
                         setcookie('key', $key, time() + 60 * 60 * 24 * 30); // случайная строка
-                        /*
-                            Пишем эту же куку в базу данных для данного юзера.
-                            Формируем и отсылаем SQL запрос:
-                            ОБНОВИТЬ  таблицу_users УСТАНОВИТЬ cookie = $key ГДЕ login=$login.
-                        */
-                        $user[] = array('cookie' => $key);
-                        //$user += ['cookie' => $key];
-                        $user_db->update('login', $login, $user);
+                        // Пишем эту же куку в базу данных для данного юзера.
+                        $user += ['cookie' => $key]; // добавляем cookie в массив
+                        $user_db->update('login', $login, $user); // обновляем в базе
                     }
                     // cookie
                 } else {
