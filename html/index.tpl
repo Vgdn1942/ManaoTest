@@ -40,7 +40,7 @@
     <p>
         <label for="password_entry">Пароль:<br></label>
         <input name="password_entry" id="password_entry" type="password" size="32"
-               placeholder="Формат: символы + цифры" minlength="6" maxlength="32"
+               placeholder="Буквы и цифры" minlength="6" maxlength="32"
                pattern="^(?=.*\d)(?=.*[a-zA-Z])(?!.*\s).*$" required>
     </p>
     <br>
