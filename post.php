@@ -68,8 +68,8 @@ if (isset($_POST['form'])) {
                         setcookie('login', $login, time() + 60 * 60 * 24 * 30); // логин
                         setcookie('key', $key, time() + 60 * 60 * 24 * 30); // случайная строка
                         // Пишем эту же куку в базу данных для данного юзера.
-                        $user += ['cookie' => $key]; // добавляем cookie в массив
-                        $user_db->update('login', $login, $user); // обновляем в базе
+                        $cookie = ['cookie' => $key]; // добавляем cookie в массив
+                        $user_db->addRow('login', $login, $cookie); // обновляем в базе
                     }
                     // cookie
                 } else {

@@ -159,6 +159,12 @@ class JsonDb {
         return true;
     }
 
+    public function addRow($key, $val = 0, $newRow = array()): bool {
+        $data = $this->select($key, $val);
+        $data += $newRow;
+        return $this->update($key, $val, $data);
+    }
+
     public function deleteAll(): bool {
         $this->fileData = array();
         return true;
