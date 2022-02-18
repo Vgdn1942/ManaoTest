@@ -6,6 +6,9 @@ new mysqli('table')
 jsonDb->insert('array[]') - Добавляет массив в таблицу, возвращает 'true' в случае успеха
 (INSERT INTO `table` 'array[]')
 
+jsonDb->addRow('key', 'value', 'array[]') - Добавляет новое значение array[] в конец записи, где 'key' соответствует 'value'
+(UPDATE `table` SET 'array[0]' = 'array[1]' WHERE 'key' = 'value')
+
 jsonDb->select('key', 'value') - Выбирает все записи из таблицы где 'key' соответствует 'value'
 (SELECT * FROM `table` WHERE `key` = 'value')
 

@@ -60,7 +60,8 @@ if (isset($_POST['form'])) {
                         $_SESSION[$key] = $val;
                     }
                     // cookie
-                    //if (!empty($_REQUEST['remember']) and $_REQUEST['remember'] == 1) {
+                    // TODO: Add remember checkbox
+                    //if (isset($_POST['remember']) and $_POST['remember'] == 1) {
                     if (true) {
                         // Сформируем случайную строку для куки (используем функцию generateSalt):
                         $key = generateSalt(); // назовем ее $key
