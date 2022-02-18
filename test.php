@@ -17,18 +17,17 @@ $user = $user_db->select('login', 'Vgdn1942');
 
 echo "<br><br>";
 
+echo "Session: ";
 foreach ($user as $key2 => $val2) {
         echo "Key: " . $key2 . ", Val: " . $val2;
 }
 
 echo "<br><br>";
 
-/*
-foreach ($user as $val) {
-    if (is_array($val)) {
-        return $val;
-    } else {
-        return $user;
-    }
-}
-*/
+echo "Session: ";
+print_r($_SESSION);
+
+echo "<br><br>";
+
+echo "Cookie: ";
+print_r($_COOKIE);
