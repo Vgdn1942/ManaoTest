@@ -129,7 +129,8 @@ button:active {
 
 .errorMsg {
     position: absolute;
-    left: 300px;
-    width: 300px;
+    left: 19.25em;
+    width: 20em;
+    font-weight: bold;
     color: red;
 }
