@@ -13,13 +13,17 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 require_once('include/JsonDb.php');
 require_once('include/User.php');
 
+$data['result'] = 'success';
+
 try {
     $user_db = new JsonDb("./db/users.json");
 } catch (Exception $e) {
+    $data['result'] = 'error';
+    echo json_encode($data); // отправляем результат
     exit($e);
 }
 
-function is_exists($key, $value, $db): bool {
+function isExists($key, $value, $db): bool {
     return count($db->select($key, $value)) !== 0;
 }
 
@@ -41,15 +45,13 @@ $errors = array(
     'hash_not' => " <- Ошибка создания хэша пароля!"
 );
 
-$data['result'] = 'success';
-
 if (isset($_POST['form'])) {
     $form = htmlspecialchars($_POST['form']);
     if ($form == 'login') { // если данные отправлены из формы входа
         if (isset($_POST['login_entry']) && isset($_POST['password_entry'])) {
             $login = htmlspecialchars($_POST['login_entry']);
             $password = htmlspecialchars($_POST['password_entry']);
-            if (is_exists('login', $login, $user_db)) { // если пользователь есть в базе
+            if (isExists('login', $login, $user_db)) { // если пользователь есть в базе
                 $user_hash = $user_db->selectRow('login', $login, 'passwd'); // получаем его хэш пароля
                 if (password_verify($password, $user_hash)) { // если пароль совпадает с хэшем запускаем сессию
                     session_start();
@@ -87,26 +89,26 @@ if (isset($_POST['form'])) {
         if (isset($_POST['login']) && isset($_POST['password']) && isset($_POST['confirm']) && isset($_POST['email']) && isset($_POST['name'])) {
             // login
             $login = htmlspecialchars($_POST['login']); // защита от передачи скриптов в запросе
-            if (is_exists('login', $login, $user_db)) {
+            if (isExists('login', $login, $user_db)) {
                 $data['login'] = $errors['user_reg'];
                 $data['result'] = 'error';
             }
             // password
-            $password = htmlspecialchars($_POST['password']);
+            $password = htmlspecialchars($_POST['password']); // защита от передачи скриптов в запросе
             $pass_hash = password_hash($password, PASSWORD_DEFAULT);
             if (!$pass_hash) {
                 $data['password'] = $errors['hash_not'];
                 $data['result'] = 'error';
             }
             // confirm
-            $confirm = htmlspecialchars($_POST['confirm']);
+            $confirm = htmlspecialchars($_POST['confirm']); // защита от передачи скриптов в запросе
             if ($password !== $confirm) {
                 $data['confirm'] = $errors['confirm_not'];
                 $data['result'] = 'error';
             }
             // email
             $email = htmlspecialchars($_POST['email']); // защита от передачи скриптов в запросе
-            if (is_exists('email', $email, $user_db)) {
+            if (isExists('email', $email, $user_db)) {
                 $data['email'] = $errors['email_reg'];
                 $data['result'] = 'error';
             }
@@ -119,12 +121,10 @@ if (isset($_POST['form'])) {
             }
         } else {
             $data['result'] = 'error';
-            exit(); // если каких-то данных нет, роскомнадзорнуемся
         }
     }
 } else {
     $data['result'] = 'error';
-    exit(); // если каких-то данных нет, роскомнадзорнуемся
 }
 
 echo json_encode($data); // отправляем результат

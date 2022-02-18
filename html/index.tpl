@@ -48,6 +48,6 @@
 </form>
 <p></p>
 
-<div id="results">вывод</div>
+<!-- <div id="results">Вывод</div> -->
 
 <script type="text/javascript" src="scripts/ajax_form.js"></script>

@@ -21,7 +21,7 @@ function sendForm(form, name) {
                 }
                 showError(error, data[error]);
             }
-            $('#results').html(msg);
+            //$('#results').html(msg);
             if (name === 'login' && data['result'] === 'success') {
                 location.href = "index.php";
             }

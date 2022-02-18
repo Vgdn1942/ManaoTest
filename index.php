@@ -16,7 +16,7 @@ if (isset($_GET['logout'])) {
 }
 
 if (empty($_SESSION['login'])) {
-    if (!empty($_COOKIE['key']) ) {
+    if (!empty($_COOKIE['key'])) {
         // Пишем логин и ключ из КУК в переменные (для удобства работы):
         $key = $_COOKIE['key']; // ключ из кук (аналог пароля, в базе поле cookie)
         // Формируем и отсылаем запрос к базе:
