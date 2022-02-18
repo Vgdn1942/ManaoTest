@@ -1,38 +1,38 @@
 <?php
-/*
-jsonDb = new JsonDB('path/to/file.json', create = false); - подключение к таблице-файлу, если create = true, создаёт файл если его не существовало, иначе выбрасывает исключение
-new mysqli('table')
 
-jsonDb->insert('array[]') - Добавляет массив в таблицу, возвращает 'true' в случае успеха
-(INSERT INTO `table` 'array[]')
-
-jsonDb->addRow('key', 'value', 'array[]') - Добавляет новое значение array[] в конец записи, где 'key' соответствует 'value'
-(UPDATE `table` SET 'array[0]' = 'array[1]' WHERE 'key' = 'value')
-
-jsonDb->select('key', 'value') - Выбирает все записи из таблицы где 'key' соответствует 'value'
-(SELECT * FROM `table` WHERE `key` = 'value')
-
-jsonDb->selectRow('key', 'value', 'row') - Возвращает строку 'row' из таблицы где 'key' соответствует 'value'
-// аналог
-$res = $conn->query("SELECT * FROM `table` WHERE `key` = 'value'");
-$row = $res->fetch_array();
-return $row['row']
-
-jsonDb->selectAll() - возвращает все записи из таблицы
-(SELECT * FROM `table`)
-
-jsonDb->update('key', 'value', array[]) - Заменяет строку соответствующую 'key'->'value' на данные из массива 'array'
-(UPDATE `table` SET 'array[]' WHERE `key` = 'value')
-
-jsonDb->updateAll('array[]') - Заменяет все данные в файле массивом 'array[]'
-
-jsonDb->delete('key', 'value') - Удаляет все строки, соответствующие 'key'->'value', возвращает количество удаленных строк
-(DELETE FROM `downloads` WHERE `key` = 'values')
-
-jsonDb->deleteAll() - Удаляет все данные из таблицы-файла, возвращает 'true' в случае успеха
-(TRUNCATE 'table')
-*/
-
+/**
+ * jsonDb = new JsonDB('path/to/file.json', create = false); - подключение к таблице-файлу, если create = true, создаёт файл если его не существовало, иначе выбрасывает исключение
+ * new mysqli('table')
+ *
+ * jsonDb->insert('array[]') - Добавляет массив в таблицу, возвращает 'true' в случае успеха
+ * (INSERT INTO `table` 'array[]')
+ *
+ * jsonDb->addRow('key', 'value', 'array[]') - Добавляет новое значение array[] в конец записи, где 'key' соответствует 'value'
+ * (UPDATE `table` SET 'array[0]' = 'array[1]' WHERE 'key' = 'value')
+ *
+ * jsonDb->select('key', 'value') - Выбирает все записи из таблицы где 'key' соответствует 'value'
+ * (SELECT * FROM `table` WHERE `key` = 'value')
+ *
+ * jsonDb->selectRow('key', 'value', 'row') - Возвращает строку 'row' из таблицы где 'key' соответствует 'value'
+ * // аналог
+ * $res = $conn->query("SELECT * FROM `table` WHERE `key` = 'value'");
+ * $row = $res->fetch_array();
+ * return $row['row']
+ *
+ * jsonDb->selectAll() - возвращает все записи из таблицы
+ * (SELECT * FROM `table`)
+ *
+ * jsonDb->update('key', 'value', array[]) - Заменяет строку соответствующую 'key'->'value' на данные из массива 'array'
+ * (UPDATE `table` SET 'array[]' WHERE `key` = 'value')
+ *
+ * jsonDb->updateAll('array[]') - Заменяет все данные в файле массивом 'array[]'
+ *
+ * jsonDb->delete('key', 'value') - Удаляет все строки, соответствующие 'key'->'value', возвращает количество удаленных строк
+ * (DELETE FROM `downloads` WHERE `key` = 'values')
+ *
+ * jsonDb->deleteAll() - Удаляет все данные из таблицы-файла, возвращает 'true' в случае успеха
+ * (TRUNCATE 'table')
+ */
 class JsonDb {
 
     protected $jsonFile;
@@ -86,10 +86,18 @@ class JsonDb {
         }
     }
 
+    /**
+     * @return array
+     */
     public function selectAll(): array {
         return $this->fileData;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @return array
+     */
     public function select($key, $val = 0): array {
         $result = array();
         if (is_array($key)) {
@@ -114,6 +122,12 @@ class JsonDb {
         return $result;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @param $row
+     * @return string
+     */
     public function selectRow($key, $val, $row): string {
         $result = '';
         $data = $this->fileData;
@@ -127,6 +141,10 @@ class JsonDb {
         return $result;
     }
 
+    /**
+     * @param $data
+     * @return array|mixed
+     */
     public function updateAll($data = array()) {
         if (isset($data[0]) && substr_compare($data[0], $this->jsonFile, 0)) {
             $data = $data[1];
@@ -134,6 +152,12 @@ class JsonDb {
         return $this->fileData = empty($data) ? array() : $data;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @param $newData
+     * @return bool
+     */
     public function update($key, $val = 0, $newData = array()): bool {
         $result = false;
         if (is_array($key)) {
@@ -154,6 +178,10 @@ class JsonDb {
         return $result;
     }
 
+    /**
+     * @param $data
+     * @return bool
+     */
     public function insert($data = array()): bool {
         if (isset($data[0]) && substr_compare($data[0], $this->jsonFile, 0)) {
             $data = $data[1];
@@ -162,17 +190,31 @@ class JsonDb {
         return true;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @param $newRow
+     * @return bool
+     */
     public function addRow($key, $val = 0, $newRow = array()): bool {
         $data = $this->select($key, $val);
         $data += $newRow;
         return $this->update($key, $val, $data);
     }
 
+    /**
+     * @return bool
+     */
     public function deleteAll(): bool {
         $this->fileData = array();
         return true;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @return int
+     */
     public function delete($key, $val = 0): int {
         $result = 0;
         if (is_array($key)) {

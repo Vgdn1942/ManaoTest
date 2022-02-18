@@ -1,6 +1,6 @@
 <?php
+
 require_once('include/Template.php');
-require_once('include/User.php');
 
 session_start();
 
@@ -17,7 +17,7 @@ if (isset($_GET['logout'])) {
 
 if (empty($_SESSION['login'])) {
     if (!empty($_COOKIE['key'])) {
-        // Пишем логин и ключ из КУК в переменные (для удобства работы):
+        // Пишем ключ из кук в переменные (для удобства работы):
         $key = $_COOKIE['key']; // ключ из кук (аналог пароля, в базе поле cookie)
         // Формируем и отсылаем запрос к базе:
         try {
@@ -43,10 +43,9 @@ $tpl_array = array(
 Template::showTemplate('html/head.tpl', $tpl_array);
 
 if (!empty($_SESSION['login'])) {
-    $tpl_array += ['hello' => "Hello, " . $_SESSION['name']];
-    Template::showTemplate('html/hello.tpl', $tpl_array);
+    Template::showTemplate('html/index.tpl', $tpl_array);
 } else {
-    Template::showTemplate('html/index.tpl');
+    Template::showTemplate('html/reg.tpl');
 }
 
 Template::showTemplate('html/footer.tpl');

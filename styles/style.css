@@ -31,6 +31,24 @@ body {
     width: auto;
 }
 
+a {
+    color: var(--color-styleLink);
+    text-decoration: none;
+}
+
+a:visited {
+    color: var(--color-styleVisited);
+}
+
+a:link:hover, a:visited:hover {
+    color: red;
+    text-decoration: underline;
+}
+
+a.text:hover {
+    text-decoration: none;
+}
+
 h1 {
     font-size: 150%;
     margin: 0;

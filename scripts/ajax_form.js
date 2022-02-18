@@ -14,16 +14,23 @@ function sendForm(form, name) {
         $(form).serialize() + '&form=' + name, // отправляемые данные
         function (msg) { // получен ответ сервера
             $('.errorMsg').remove(); // удаляем все ошибки в форме
-            let data = JSON.parse(msg);
-            for (const error in data) {
-                if (error === 'result') {
-                    continue;
+            let data = JSON.parse(msg); // парсим ответ
+            if (data['result'] !== 'success') { // если есть ошибки
+                for (const errorField in data) { // проходим в цикле по ошибкам
+                    if (errorField === 'result') { // пропускаем data[result]
+                        continue;
+                    }
+                    showError(errorField, data[errorField]); // показываем ошибки
                 }
-                showError(error, data[error]);
             }
             //$('#results').html(msg);
-            if (name === 'login' && data['result'] === 'success') {
-                location.href = "index.php";
+            if (data['result'] === 'success') { // если ошибок нет
+                $(form).trigger('reset'); // очищаем форму в случае успеха
+                if (name === 'login') {
+                    location.href = "index.php";
+                } else if (name === 'reg') {
+                    alert("Регистрация прошла успешно!" + "\n" + "Теперь вы можете выполнить вход.")
+                }
             }
         }
     );
